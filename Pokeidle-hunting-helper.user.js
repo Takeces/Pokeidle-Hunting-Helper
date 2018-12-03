@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         PokeIdle Shiny Hunting
-// @namespace    http://tampermonkey.net/
+// @namespace    Pokeidle
 // @version      1.0
-// @description  try to take over the world!
+// @description  Adds CSS to extend the game view for fullscreen browser windows
 // @author       Akerus aka Takeces
 // @match        https://richardpaulastley.github.io/
 // @grant        GM_addStyle
