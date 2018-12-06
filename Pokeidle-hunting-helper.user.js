@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         PokeIdle Shiny Hunting
+// @name         PokeIdle Hunting Helper
 // @namespace    Pokeidle
 // @version      1.0
 // @description  Adds CSS to extend the game view for fullscreen browser windows
