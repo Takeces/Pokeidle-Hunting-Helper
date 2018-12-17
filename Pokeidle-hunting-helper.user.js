@@ -28,8 +28,16 @@
 
         var first = name;
         var firstTmp = '';
+        // this is needed to handle full cycle evolution pokemons (like Rotom in Sinnoh - Strange TV and others)
+        var evosTmp = [first];
         while(firstTmp = getPreviousEvo(first)) {
             if(!firstTmp) break;
+            // if a full cycle is detected abort and continue with initial pokemon as first
+            if(evosTmp.includes(firstTmp)) {
+                first = name;
+                break;
+            }
+            evosTmp.push(firstTmp);
             first = firstTmp;
         }
 
