@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper
 // @namespace    Pokeidle
-// @version      1.1
-// @description  Adds CSS to extend the game view for fullscreen browser windows
+// @version      1.2
+// @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
 // @match        https://richardpaulastley.github.io/
 // @grant        GM_addStyle
@@ -11,8 +11,9 @@
 (function() {
 
     GM_addStyle('li.norm-all {background-color: #6995f3;}');
+    GM_addStyle('li.norm-all-evo:after {content: "✓";}');
     GM_addStyle('li.shiny-all {background-color: gold;}');
-    GM_addStyle('li.shiny-all-evo:after {content: "✓";}');
+    GM_addStyle('li.shiny-all-evo:after {content: "✓"; color: yellow; text-shadow: 0px 0px 3px black;}');
 
     const domQuery = (cssQuery) => document.querySelector(cssQuery);
     const $ = domQuery;
@@ -85,21 +86,13 @@
         return allPokemon;
     }
 
-
-    /**
-     * Overwrite of the original player.hasPokemon() function.
-     * Originally this would only check if the player has the Pokemon in his inventory or storage.
-     * Now we're looking differently:
-     * If it is shiny, we want to look in inventory and storage -> living shiny dex
-     * Else we look into the Pokedex -> has it already been caught once?
-     */
-	player.hasPokemon = function (pokemonName, shiny) {
+    function checkForRouteMarking(pokemonName, shiny) {
 		if(shiny) {
 			var allPokemon = getAllPlayersPokemon();
 			return typeof allPokemon.find(function(obj){ return (this[0] == obj.pokeName() && this[1] == obj.shiny()); }, [pokemonName, shiny]) != 'undefined';
 		}
 		return typeof player.pokedexData().find(function(obj){ return this[0] == obj.name && obj.flag > 2;}, [pokemonName]) != 'undefined';
-	};
+    }
 
     /**
      * Copy of the original setValue() function. No changes.
@@ -135,29 +128,46 @@
             // Getting information if we already catched every Pokemon on this route
 			var gotAll = true;
 			for(var i = 0; i < route.pokes.length; i++) {
-				if(!player.hasPokemon(route.pokes[i], false)){
+				if(!checkForRouteMarking(route.pokes[i], false)){
 					gotAll = false;
 					break;
 				}
 			}
-            // Getting information if we already got all Pokemon on this route in shiny form
-			var gotAllShiny = true;
-			for(i = 0; i < route.pokes.length; i++) {
-				if(!player.hasPokemon(route.pokes[i], true)){
-					gotAllShiny = false;
-					break;
-				}
-			}
             // Getting information about enough Pokemon for all evolutions.
-            var gotAllShinyForEvo = true;
+			var gotAllEvo = true;
             for(i = 0; i < route.pokes.length; i++) {
                 var evos = getAllEvolutions(route.pokes[i]);
                 evos = evos.slice(evos.indexOf(route.pokes[i]));
                 var allPokes = getAllPlayersPokemon();
                 var no = 0;
+                for(var name of evos) {
+
+                    var found = allPokes.reduce((a, e, i) => e.pokeName() === name ? a.concat(i) : a, []);
+                    no += found.length;
+                }
+                if(no < evos.length) {
+                    gotAllEvo = false;
+                    break;
+                }
+			}
+            // Getting information if we already got all Pokemon on this route in shiny form
+			var gotAllShiny = true;
+			for(i = 0; i < route.pokes.length; i++) {
+				if(!checkForRouteMarking(route.pokes[i], true)){
+					gotAllShiny = false;
+					break;
+				}
+			}
+            // Getting information about enough shiny Pokemon for all evolutions.
+            var gotAllShinyForEvo = true;
+            for(i = 0; i < route.pokes.length; i++) {
+                evos = getAllEvolutions(route.pokes[i]);
+                evos = evos.slice(evos.indexOf(route.pokes[i]));
+                allPokes = getAllPlayersPokemon();
+                no = 0;
                 for(name of evos) {
 
-                    var found = allPokes.reduce((a, e, i) => (e.pokeName() === name & e.shiny()) ? a.concat(i) : a, []);
+                    found = allPokes.reduce((a, e, i) => (e.pokeName() === name & e.shiny()) ? a.concat(i) : a, []);
                     no += found.length;
                 }
                 if(no < evos.length) {
@@ -169,7 +179,7 @@
             // set our information
             setValue(
                 listElement
-                , `<li class="${gotAll?'norm-all':''} ${gotAllShiny?'shiny-all':''} ${gotAllShinyForEvo?'shiny-all-evo':''}">
+                , `<li class="${gotAll?'norm-all':''} ${gotAllEvo?'norm-all-evo':''} ${gotAllShiny?'shiny-all':''} ${gotAllShinyForEvo?'shiny-all-evo':''}">
           <a
           href="#"
           onclick="${route.unlocked
