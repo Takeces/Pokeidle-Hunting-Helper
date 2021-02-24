@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper
 // @namespace    Pokeidle
-// @version      1.2
+// @version      2
 // @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
-// @match        https://richardpaulastley.github.io/
+// @match        https://pokeidle.net/*
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -191,7 +191,7 @@
             color: ${route.unlocked
                 && (routeId === userSettings.currentRouteId
                     && 'rgb(51, 111, 22)'
-                    || 'rgb(53, 50, 103)' )
+                    || 'rgb(176, 180, 184)' )
                 || 'rgb(167, 167, 167)'
                     };
             font-weight: ${routeId === userSettings.currentRouteId
