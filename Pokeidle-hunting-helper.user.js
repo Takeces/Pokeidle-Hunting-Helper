@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper
 // @namespace    Pokeidle
-// @version      2.1
+// @version      2.2
 // @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
 // @match        https://pokeidle.net/*
@@ -58,7 +58,7 @@
      */
     function getEvolution(name) {
         if(EVOLUTIONS.hasOwnProperty(name)) {
-            return pokeByName(EVOLUTIONS[name]['to']).pokemon[0].DisplayName;
+            return EVOLUTIONS[name]['to'];
         }
         return null;
     }
@@ -153,7 +153,7 @@
             // Getting information if we already got all Pokemon on this route in shiny form
 			var gotAllShiny = true;
 			for(i = 0; i < route.pokes.length; i++) {
-				if(!checkForRouteMarking(route.pokes[i], true)){
+				if(!checkForRouteMarking(pokeByName(route.pokes[i]).pokemon[0].DisplayName, true)){
 					gotAllShiny = false;
 					break;
 				}
@@ -167,7 +167,7 @@
                 no = 0;
                 for(name of evos) {
 
-                    found = allPokes.reduce((a, e, i) => (e.pokeName() === name & e.shiny()) ? a.concat(i) : a, []);
+                    found = allPokes.reduce((a, e, i) => (e.pokeId() === name & e.shiny()) ? a.concat(i) : a, []);
                     no += found.length;
                 }
                 if(no < evos.length) {
