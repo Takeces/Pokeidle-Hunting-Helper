@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper
 // @namespace    Pokeidle
-// @version      2.2
+// @version      2.3
 // @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
 // @match        https://pokeidle.net/*
@@ -142,7 +142,7 @@
                 var no = 0;
                 for(var name of evos) {
 
-                    var found = allPokes.reduce((a, e, i) => e.pokeName() === name ? a.concat(i) : a, []);
+                    var found = allPokes.reduce((a, e, i) => e.pokeId() === name ? a.concat(i) : a, []);
                     no += found.length;
                 }
                 if(no < evos.length) {
