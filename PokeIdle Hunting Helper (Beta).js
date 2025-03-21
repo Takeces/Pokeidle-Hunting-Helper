@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper (Beta)
 // @namespace    Pokeidle
-// @version      5
+// @version      5.3
 // @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
 // @match        http://ukegwoj.cluster029.hosting.ovh.net/*
@@ -173,8 +173,24 @@
 
             // Getting information about enough Pokemon for all evolutions.
 			var gotAllEvo = true;
-            // if we didn't got all from that route, we also don't have enough for all evo
+            // first, check for all possible evolutions
             if(gotAllEvo) {
+                for(let poke of route.pokes) {
+                    const evos = getAllEvolutions(poke);
+                    let no = 0;
+                    for(let evo of evos) {
+                        let found = allPlayerPokes.reduce((a, e, i) => e.pokeId() === evo ? a.concat(i) : a, []);
+                        no += found.length;
+                    }
+                    if(no < evos.length) {
+                        gotAllEvo = false;
+                        break;
+                    }
+                }
+            }
+            // if something is missing, check only for evolutions, based on the route
+            if(!gotAllEvo) {
+                gotAllEvo = true;
                 for(let poke of route.pokes) {
                     const evos = getAllEvolutionsForRoute(poke, route);
                     let no = 0;
@@ -200,8 +216,24 @@
 
             // Getting information if player has all the
             var gotAllShinyForEvo = true;
-            // if we didn't got all shiny from that route, we also don't have enough for all shiny evo
+            // first, check for all possible evolutions
             if(gotAllShinyForEvo) {
+                for(let poke of route.pokes) {
+                    const evos = getAllEvolutions(poke);
+                    let no = 0;
+                    for(let evo of evos) {
+                        let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo & e.shiny()) ? a.concat(i) : a, []);
+                        no += found.length;
+                    }
+                    if(no < evos.length) {
+                        gotAllShinyForEvo = false;
+                        break;
+                    }
+                }
+            }
+            // if something is missing, check only for evolutions, based on the route
+            if(!gotAllShinyForEvo) {
+                gotAllShinyForEvo = true;
                 for(let poke of route.pokes) {
                     const evos = getAllEvolutionsForRoute(poke, route);
                     let no = 0;
