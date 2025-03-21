@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper (Beta)
 // @namespace    Pokeidle
-// @version      5.3
+// @version      5.4
 // @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
 // @match        http://ukegwoj.cluster029.hosting.ovh.net/*
@@ -182,25 +182,18 @@
                         let found = allPlayerPokes.reduce((a, e, i) => e.pokeId() === evo ? a.concat(i) : a, []);
                         no += found.length;
                     }
+                    // if someting is missing, check for evolutions only based on the route itself
                     if(no < evos.length) {
-                        gotAllEvo = false;
-                        break;
-                    }
-                }
-            }
-            // if something is missing, check only for evolutions, based on the route
-            if(!gotAllEvo) {
-                gotAllEvo = true;
-                for(let poke of route.pokes) {
-                    const evos = getAllEvolutionsForRoute(poke, route);
-                    let no = 0;
-                    for(let evo of evos) {
-                        let found = allPlayerPokes.reduce((a, e, i) => e.pokeId() === evo ? a.concat(i) : a, []);
-                        no += found.length;
-                    }
-                    if(no < evos.length) {
-                        gotAllEvo = false;
-                        break;
+                        const evosRoute = getAllEvolutionsForRoute(poke, route);
+                        let noRoute = 0;
+                        for(let evo of evosRoute) {
+                            let found = allPlayerPokes.reduce((a, e, i) => e.pokeId() === evo ? a.concat(i) : a, []);
+                            noRoute += found.length;
+                        }
+                        if(noRoute < evosRoute.length) {
+                            gotAllEvo = false;
+                            break;
+                        }
                     }
                 }
             }
@@ -225,25 +218,18 @@
                         let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo & e.shiny()) ? a.concat(i) : a, []);
                         no += found.length;
                     }
+                    // if someting is missing, check for evolutions only based on the route itself
                     if(no < evos.length) {
-                        gotAllShinyForEvo = false;
-                        break;
-                    }
-                }
-            }
-            // if something is missing, check only for evolutions, based on the route
-            if(!gotAllShinyForEvo) {
-                gotAllShinyForEvo = true;
-                for(let poke of route.pokes) {
-                    const evos = getAllEvolutionsForRoute(poke, route);
-                    let no = 0;
-                    for(let evo of evos) {
-                        let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo & e.shiny()) ? a.concat(i) : a, []);
-                        no += found.length;
-                    }
-                    if(no < evos.length) {
-                        gotAllShinyForEvo = false;
-                        break;
+                        const evosRoute = getAllEvolutionsForRoute(poke, route);
+                        let noRoute = 0;
+                        for(let evo of evosRoute) {
+                            let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo & e.shiny()) ? a.concat(i) : a, []);
+                            noRoute += found.length;
+                        }
+                        if(noRoute < evosRoute.length) {
+                            gotAllShinyForEvo = false;
+                            break;
+                        }
                     }
                 }
             }
