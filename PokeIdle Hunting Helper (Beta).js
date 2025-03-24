@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeIdle Hunting Helper (Beta)
 // @namespace    Pokeidle
-// @version      5.4
+// @version      5.5
 // @description  Highlights routes blue if all Pokemon there have been caught and adds a checkmark if enough for all evolutions have been caught there. Highlight gets golden when all Pokemon there have been caught as shiny and checkmark gets yellow if enough shinies for all evolutions have been caught.
 // @author       Takeces aka Akerus
 // @match        http://ukegwoj.cluster029.hosting.ovh.net/*
@@ -78,23 +78,29 @@
      * @return {string} Name of the base form
      */
 	function getBaseForm(name) {
+        // helper array for detecting cycles
+        let evos = [name];
 		let first = name;
         let previous = '';
         while(previous = getPreviousEvo(first)) {
             if(!previous) break;
+            if(evos.includes(previous)) break;
+            evos.push(previous);
             first = previous;
         }
 		return first;
     }
 
 	function getBaseFormForRoute(name, route) {
+        // helper array for detecting cycles
+        let evos = [name];
 		let first = name;
         let previous = '';
         while(previous = getPreviousEvo(first)) {
             if(!previous) break;
-            if(!route.pokes.includes(previous)) {
-               break;
-            }
+            if(!route.pokes.includes(previous)) break;
+            if(evos.includes(previous)) break;
+            evos.push(previous);
             first = previous;
         }
 		return first;
@@ -165,7 +171,7 @@
             // Getting information if we already catched every Pokemon on this route
 			var gotAll = true;
             for(let poke of route.pokes) {
-                if(!player.hasPokemon(poke,false)) {
+                if(!player.hasPokemon(poke,false) && !player.hasPokemon(poke,true)) {
                     gotAll = false;
                     break;
                 }
@@ -215,7 +221,7 @@
                     const evos = getAllEvolutions(poke);
                     let no = 0;
                     for(let evo of evos) {
-                        let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo & e.shiny()) ? a.concat(i) : a, []);
+                        let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo && e.shiny()) ? a.concat(i) : a, []);
                         no += found.length;
                     }
                     // if someting is missing, check for evolutions only based on the route itself
@@ -223,7 +229,7 @@
                         const evosRoute = getAllEvolutionsForRoute(poke, route);
                         let noRoute = 0;
                         for(let evo of evosRoute) {
-                            let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo & e.shiny()) ? a.concat(i) : a, []);
+                            let found = allPlayerPokes.reduce((a, e, i) => (e.pokeId() === evo && e.shiny()) ? a.concat(i) : a, []);
                             noRoute += found.length;
                         }
                         if(noRoute < evosRoute.length) {
